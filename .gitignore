@@ -15,6 +15,7 @@ rusty-tags.*
 #Eclipse project files
 .cproject
 .project
+.vscode
 
 # Compiled python modules.
 *.pyc
