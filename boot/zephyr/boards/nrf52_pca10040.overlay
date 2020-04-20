@@ -1,5 +1,5 @@
 &spi2 {
-    compatible = "nordic,nrf-spim";
+    compatible = "nordic,nrf-spi";
     sdhc0: sdhc@0 {
         compatible = "zephyr,mmc-spi-slot";
         reg = <0>;
