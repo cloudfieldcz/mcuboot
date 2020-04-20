@@ -21,11 +21,6 @@
 #include <drivers/flash.h>
 #include <drivers/timer/system_timer.h>
 #include <usb/usb_device.h>
-#include <device.h>
-#include <disk/disk_access.h>
-#include <fs/fs.h>
-#include <ff.h>
-#include <devicetree.h>
 #include <soc.h>
 
 #include "target.h"
@@ -34,6 +29,10 @@
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
 #include "flash_map_backend/flash_map_backend.h"
+
+#ifdef CONFIG_MCUBOOT_SD_UPDATE
+#include "sd_update.h"
+#endif
 
 #ifdef CONFIG_MCUBOOT_SERIAL
 #include "boot_serial/boot_serial.h"
@@ -180,15 +179,6 @@ static void do_boot(struct boot_rsp *rsp)
 }
 #endif
 
-static FATFS fat_fs;
-/* mounting info */
-static struct fs_mount_t mp = {
-	.type = FS_FATFS,
-	.fs_data = &fat_fs,
-};
-
-static const char *disk_mount_pt = "/SD:";
-
 void main(void)
 {
     struct boot_rsp rsp;
@@ -262,54 +252,21 @@ void main(void)
     }
 #endif
 
-    /* raw disk i/o */
-	do {
-		static const char *disk_pdrv = "SD";
-		u64_t memory_size_mb;
-		u32_t block_count;
-		u32_t block_size;
-        int err = 0;
-
-        BOOT_LOG_INF("#1");
-		if ((err = disk_access_init(disk_pdrv)) != 0) {
-			BOOT_LOG_ERR("Storage init ERROR! %d", err);
-			break;
-		}
-        BOOT_LOG_INF("#2");
-
-		if (disk_access_ioctl(disk_pdrv,
-				DISK_IOCTL_GET_SECTOR_COUNT, &block_count)) {
-			BOOT_LOG_ERR("Unable to get sector count");
-			break;
-		}
-		BOOT_LOG_INF("Block count %u", block_count);
-
-		if (disk_access_ioctl(disk_pdrv,
-				DISK_IOCTL_GET_SECTOR_SIZE, &block_size)) {
-			BOOT_LOG_ERR("Unable to get sector size");
-			break;
-		}
-		BOOT_LOG_INF("Sector size %u\n", block_size);
-
-		memory_size_mb = (u64_t)block_count * block_size;
-		BOOT_LOG_INF("Memory Size(MB) %u\n", (u32_t)memory_size_mb>>20);
-	} while (0);
-
-	mp.mnt_point = disk_mount_pt;
-
-	int res = fs_mount(&mp);
-
-	if (res == FR_OK) {
-		BOOT_LOG_INF("Disk mounted.\n");
-	} else {
-		BOOT_LOG_ERR("Error mounting disk.\n");
-	}
-
-	while (1) {
-		k_sleep(K_MSEC(1000));
-	}
+#ifdef CONFIG_MCUBOOT_SD_UPDATE
+    bool updated = do_sd_update();
+#endif
 
     rc = boot_go(&rsp);
+    #ifdef CONFIG_MCUBOOT_SD_UPDATE
+        if (rc != 0 && updated) {
+            BOOT_LOG_INF("Failed to boot updated firmware, attemptin revert...");
+            int res = revert_update();
+            if (res == 0) {
+                BOOT_LOG_INF("Revert successful, booting original firmware");
+                rc = boot_go(&rsp);
+            }
+        }
+    #endif
     if (rc != 0) {
         BOOT_LOG_ERR("Unable to find bootable image");
         while (1)
