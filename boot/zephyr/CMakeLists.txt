@@ -188,6 +188,10 @@ if(CONFIG_BOOT_ENCRYPT_EC256)
     )
 endif()
 
+if(CONFIG_MCUBOOT_SD_UPDATE)
+  zephyr_library_sources(sd_update.c)
+endif()
+
 if(CONFIG_MCUBOOT_SERIAL)
   zephyr_sources(${BOOT_DIR}/zephyr/serial_adapter.c)
   zephyr_sources(${BOOT_DIR}/boot_serial/src/boot_serial.c)
