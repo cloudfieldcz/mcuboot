@@ -22,7 +22,7 @@ int write_update(struct sd_update *update);
 
 int revert_update();
 
-int cleanup_update(struct sd_update *update);
+int cleanup_update(struct sd_update *update, bool removeUpdate);
 
 bool do_sd_update();
 

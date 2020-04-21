@@ -262,6 +262,12 @@ config SD_UPDATE_MOUNT_POINT
 	help
 		Indicates where the SD card will be mounted.
 
+config SD_UPDATE_DIRECTORY_NAME
+	string "Update directory"
+	default ""
+	help
+		Directory on the SD card where the image update is stored. Empty for root.
+
 config SD_UPDATE_IMAGE_FILE_NAME
 	string "Name of the image update file"
 	default "UPDATE.BIN"
