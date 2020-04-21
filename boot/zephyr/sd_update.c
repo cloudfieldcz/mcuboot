@@ -14,8 +14,9 @@
 MCUBOOT_LOG_MODULE_REGISTER(sd_update);
 
 #define PATH_SEPARATOR "/"
-#define UPDATE_FILE CONFIG_SD_UPDATE_MOUNT_POINT PATH_SEPARATOR CONFIG_SD_UPDATE_IMAGE_FILE_NAME
-#define BACKUP_FILE CONFIG_SD_UPDATE_MOUNT_POINT PATH_SEPARATOR CONFIG_SD_UPDATE_BACKUP_FILE_NAME
+#define UPDATE_DIRECTORY CONFIG_SD_UPDATE_MOUNT_POINT PATH_SEPARATOR CONFIG_SD_UPDATE_DIRECTORY_NAME
+#define UPDATE_FILE UPDATE_DIRECTORY PATH_SEPARATOR CONFIG_SD_UPDATE_IMAGE_FILE_NAME
+#define BACKUP_FILE UPDATE_DIRECTORY PATH_SEPARATOR CONFIG_SD_UPDATE_BACKUP_FILE_NAME
 
 static FATFS fat_fs;
 /* mounting info */
@@ -65,9 +66,9 @@ int check_sd_update(struct sd_update *update) {
     static struct fs_dirent entry;
     bool has_update = false;
 
-    res = fs_opendir(&dirp, CONFIG_SD_UPDATE_MOUNT_POINT);
+    res = fs_opendir(&dirp, UPDATE_DIRECTORY);
     if (res) {
-        BOOT_LOG_ERR("Error opening dir %s [%d]\n", CONFIG_SD_UPDATE_MOUNT_POINT, res);
+        BOOT_LOG_ERR("Error opening dir %s [%d]\n", UPDATE_DIRECTORY, res);
         return res;
     }
 
@@ -88,6 +89,7 @@ int check_sd_update(struct sd_update *update) {
 
     if (!has_update) {
         BOOT_LOG_INF("No update file found on the SD card");
+        update->update_file.filep = NULL;
         return -ENOENT;
     }
 
@@ -397,8 +399,13 @@ int revert_update() {
     return res;
 }
 
-int cleanup_update(struct sd_update *update) {
-    fs_close(&update->update_file);
+int cleanup_update(struct sd_update *update, bool removeUpdate) {
+    if (update->update_file.filep != NULL) {
+        fs_close(&update->update_file);
+    }
+    if (removeUpdate) {
+        fs_unlink(UPDATE_FILE);
+    }
     return fs_unmount(&mp);
 }
 
@@ -444,7 +451,7 @@ bool do_sd_update() {
     }
 
 cleanup:
-    cleanup_update(&update);
+    cleanup_update(&update, updated);
     BOOT_LOG_INF("SD update finished");
     return updated;
 }
