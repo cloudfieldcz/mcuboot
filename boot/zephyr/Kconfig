@@ -249,6 +249,8 @@ source "subsys/logging/Kconfig.template.log_config"
 menuconfig MCUBOOT_SD_UPDATE
 	bool "MCUboot firmware update from SD card"
 	default n
+	select DISK_ACCESS
+	select DISK_ACCESS_SDHC
 	select FILE_SYSTEM
 	select FAT_FILESYSTEM_ELM
 	help
