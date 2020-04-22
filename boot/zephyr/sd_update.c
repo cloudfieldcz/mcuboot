@@ -23,9 +23,10 @@ static FATFS fat_fs;
 static struct fs_mount_t mp = {
     .type = FS_FATFS,
     .fs_data = &fat_fs,
+    .mnt_point = CONFIG_SD_UPDATE_MOUNT_POINT,
 };
 
-int init_sd() {
+int sdu_init() {
     static const char *disk_pdrv = "SD";
     int err = disk_access_init(disk_pdrv);
 
@@ -34,7 +35,6 @@ int init_sd() {
         return err;
     }
 
-    mp.mnt_point = CONFIG_SD_UPDATE_MOUNT_POINT;
     err = fs_mount(&mp);
     if (err == FR_OK) {
         BOOT_LOG_INF("SD Card mounted");
@@ -50,13 +50,15 @@ int strcasecmp(const char *s1, const char *s2)
 	const unsigned char *us1 = (const unsigned char *)s1;
 	const unsigned char *us2 = (const unsigned char *)s2;
 
-	while (tolower(*us1) == tolower(*us2++))
-		if (*us1++ == '\0')
+	while (tolower(*us1) == tolower(*us2++)) {
+        if (*us1++ == '\0') {
 			return 0;
+        }
+    }
 	return tolower(*us1) - tolower(*--us2);
 }
 
-int check_sd_update(struct sd_update *update) {
+int sdu_check_update(struct sd_update *update) {
     if (!update) {
         return -EINVAL;
     }
@@ -218,7 +220,7 @@ static int tlv_iter_next(struct tlv_iterator *it, off_t *offset, uint16_t *type,
     return 1;
 }
 
-int validate_update_image(struct sd_update *update)
+int sdu_validate_update_image(struct sd_update *update)
 {
     uint8_t hash[32];
     uint8_t buf[32];
@@ -273,7 +275,7 @@ int validate_update_image(struct sd_update *update)
     return -1;
 }
 
-int backup_firmware() {
+int sdu_backup_firmware() {
     const struct flash_area *fap;
     size_t buf_size = 256;
     uint8_t buf[buf_size];
@@ -375,7 +377,7 @@ done:
     return res;
 }
 
-int write_update(struct sd_update *update) {
+int sdu_write_update(struct sd_update *update) {
     int res = fs_seek(&update->update_file, 0, FS_SEEK_SET);
     if (res) {
         BOOT_LOG_ERR("Failed to seek at the beggining of the update file (%d)", res);
@@ -385,7 +387,7 @@ int write_update(struct sd_update *update) {
     return write_image(&update->update_file);
 }
 
-int revert_update() {
+int sdu_revert_update() {
     struct fs_file_t backup;
     int res = fs_open(&backup, BACKUP_FILE);
     if (res) {
@@ -399,7 +401,7 @@ int revert_update() {
     return res;
 }
 
-int cleanup_update(struct sd_update *update, bool removeUpdate) {
+int sdu_cleanup(struct sd_update *update, bool removeUpdate) {
     if (update->update_file.filep != NULL) {
         fs_close(&update->update_file);
     }
@@ -409,38 +411,38 @@ int cleanup_update(struct sd_update *update, bool removeUpdate) {
     return fs_unmount(&mp);
 }
 
-bool do_sd_update() {
+bool sdu_do_update() {
     BOOT_LOG_INF("Starting SD update...");
     int res;
     struct sd_update update;
     bool updated = false;
 
-    res = init_sd();
+    res = sdu_init();
     if (res) {
         return updated;
     }
 
-    res = check_sd_update(&update);
+    res = sdu_check_update(&update);
     if (res) {
         goto cleanup;
     }
 
-    res = validate_update_image(&update);
+    res = sdu_validate_update_image(&update);
     if (res) {
         BOOT_LOG_ERR("Failed update image validation (%d)", res);
         goto cleanup;
     }
 
-    res = backup_firmware();
+    res = sdu_backup_firmware();
     if (res) {
         BOOT_LOG_ERR("Could not backup current firmware, update won't continue. (%d)", res);
         goto cleanup;
     }
 
-    res = write_update(&update);
+    res = sdu_write_update(&update);
     if (res) {
         BOOT_LOG_WRN("Failed to write update, attempting revert...");
-        res = revert_update();
+        res = sdu_revert_update();
         if (res) {
             BOOT_LOG_ERR("Revert failed");
         } else {
@@ -451,7 +453,7 @@ bool do_sd_update() {
     }
 
 cleanup:
-    cleanup_update(&update, updated);
+    sdu_cleanup(&update, updated);
     BOOT_LOG_INF("SD update finished");
     return updated;
 }

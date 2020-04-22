@@ -18,6 +18,7 @@
 #include <zephyr.h>
 #include <drivers/gpio.h>
 #include <sys/__assert.h>
+#include <sys/util.h>
 #include <drivers/flash.h>
 #include <drivers/timer/system_timer.h>
 #include <usb/usb_device.h>
@@ -252,21 +253,21 @@ void main(void)
     }
 #endif
 
-#ifdef CONFIG_MCUBOOT_SD_UPDATE
-    bool updated = do_sd_update();
-#endif
+IF_ENABLED(CONFIG_MCUBOOT_SD_UPDATE, (
+    bool updated = sdu_do_update();
+))
 
     rc = boot_go(&rsp);
-    #ifdef CONFIG_MCUBOOT_SD_UPDATE
+    IF_ENABLED(CONFIG_MCUBOOT_SD_UPDATE, (
         if (rc != 0 && updated) {
             BOOT_LOG_INF("Failed to boot updated firmware, attemptin revert...");
-            int res = revert_update();
+            int res = sdu_revert_update();
             if (res == 0) {
                 BOOT_LOG_INF("Revert successful, booting original firmware");
                 rc = boot_go(&rsp);
             }
         }
-    #endif
+    ))
     if (rc != 0) {
         BOOT_LOG_ERR("Unable to find bootable image");
         while (1)

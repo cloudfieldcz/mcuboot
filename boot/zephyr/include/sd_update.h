@@ -10,20 +10,20 @@ struct sd_update {
     struct fs_file_t update_file;
 };
 
-int init_sd();
+int sdu_init();
 
-int check_sd_update(struct sd_update *update);
+int sdu_check_update(struct sd_update *update);
 
-int validate_update_image(struct sd_update *update);
+int sdu_validate_update_image(struct sd_update *update);
 
-int backup_firmware();
+int sdu_backup_firmware();
 
-int write_update(struct sd_update *update);
+int sdu_write_update(struct sd_update *update);
 
-int revert_update();
+int sdu_revert_update();
 
-int cleanup_update(struct sd_update *update, bool removeUpdate);
+int sdu_cleanup(struct sd_update *update, bool removeUpdate);
 
-bool do_sd_update();
+bool sdu_do_update();
 
 #endif
