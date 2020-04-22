@@ -4,8 +4,8 @@
 
 The boot loader is able to update the firmware image from another flash partition or an SD card. The first option is available by default. The later one is currently only available for Zephyr and only supports the FAT file system. To enable this feature you need to add the following lines into the *prj.conf* in *boot/zephyr*:
 
- - `CONFIG_MCUBOOT_SD_UPDATE=y` which automatically selects `CONFIG_FILE_SYSTEM` and `CONFIG_FAT_FILESYSTEM_ELM`
- - enable SD card driver and related drivers, this depends on your board, example is given below
+ - `CONFIG_MCUBOOT_SD_UPDATE=y` which automatically selects `CONFIG_DISK_ACCESS`, `CONFIG_DISK_ACCESS_SDHC`, `CONFIG_FILE_SYSTEM` and `CONFIG_FAT_FILESYSTEM_ELM`
+ - enable SD card and related drivers, this depends on your board, example is given below
  - depending on the drivers you may very probably need to enable multithreading by adding `CONFIG_MULTITHREADING=y`
 
 Besides that there are four optional config lines:
@@ -28,8 +28,6 @@ CONFIG_SPI=y
 CONFIG_SPI_2=y
 CONFIG_NRFX_SPI2=y
 CONFIG_SPI_2_NRF_SPI=y
-CONFIG_DISK_ACCESS=y
-CONFIG_DISK_ACCESS_SDHC=y
 CONFIG_DISK_ACCESS_SPI_SDHC=y
 ```
 
