@@ -1,6 +1,8 @@
 #include <ctype.h>
+#include <device.h>
 #include <disk/disk_access.h>
 #include <drivers/flash.h>
+#include <drivers/gpio.h>
 #include <errno.h>
 #include <ff.h>
 #include <stddef.h>
@@ -9,6 +11,7 @@
 #include "bootutil/image.h"
 #include "bootutil/sha256.h"
 #include "flash_map_backend/flash_map_backend.h"
+#include "gpio.h"
 #include "sd_update.h"
 
 MCUBOOT_LOG_MODULE_REGISTER(sd_update);
@@ -19,6 +22,13 @@ MCUBOOT_LOG_MODULE_REGISTER(sd_update);
 #define BACKUP_FILE UPDATE_DIRECTORY PATH_SEPARATOR CONFIG_SD_UPDATE_BACKUP_FILE_NAME
 
 static FATFS fat_fs;
+
+static struct device *sdcard_detect_dev = NULL;
+
+static struct device *sdcard_pow_dev = NULL;
+
+static struct gpio_callback sdcard_detect_cb;
+
 /* mounting info */
 static struct fs_mount_t mp = {
     .type = FS_FATFS,
@@ -26,8 +36,59 @@ static struct fs_mount_t mp = {
     .mnt_point = CONFIG_SD_UPDATE_MOUNT_POINT,
 };
 
+bool sdcard_present = 0;
+
+static void sdcard_detect(struct device *dev, struct gpio_callback *cb, gpio_port_pins_t pins)
+{
+    bool actual_state = gpio_pin_get(dev, dt_gpio_pin(SDCARD_DETECT));
+    if (actual_state != sdcard_present) {
+        sdcard_present = actual_state;
+        BOOT_LOG_INF("sdcard_detect: %i ", sdcard_present);
+    }
+}
+
 int sdu_init() {
     static const char *disk_pdrv = "SD";
+    int ret;
+
+    BOOT_LOG_DBG("setup %s", dt_gpio_label(SDCARD_DETECT));
+    // setup SD card detection
+    sdcard_detect_dev = dt_gpio_init(SDCARD_DETECT, GPIO_INPUT);
+
+    if (!sdcard_detect_dev) {
+        BOOT_LOG_ERR("%s unavailable", dt_gpio_label(SDCARD_DETECT));
+        return -ENODEV;
+    }
+
+    // callback uses pin_mask, so need bit shifting
+    gpio_init_callback(&sdcard_detect_cb, sdcard_detect, (1 << dt_gpio_pin(SDCARD_DETECT)));
+    ret = gpio_add_callback(sdcard_detect_dev, &sdcard_detect_cb);
+
+    if (ret) {
+        BOOT_LOG_ERR("unable set %s callback", dt_gpio_label(SDCARD_DETECT));
+        return ret;
+    }
+
+    sdcard_present = gpio_pin_get(sdcard_detect_dev, dt_gpio_pin(SDCARD_DETECT));
+    ret = gpio_pin_interrupt_configure(sdcard_detect_dev, dt_gpio_pin(SDCARD_DETECT), GPIO_INT_EDGE_BOTH | GPIO_INT_DEBOUNCE);
+    if (ret) {
+        BOOT_LOG_ERR("unable configure %s interrupt", dt_gpio_label(SDCARD_DETECT));
+        return ret;
+    }
+
+    BOOT_LOG_DBG("setup %s", dt_gpio_label(SDCARD_POW));
+
+    // enable power for sdcard
+    sdcard_pow_dev = dt_gpio_init(SDCARD_POW, GPIO_OUTPUT_ACTIVE);
+
+    if (!sdcard_pow_dev) {
+        BOOT_LOG_ERR("%s unavailable", dt_gpio_label(SDCARD_POW));
+        return -ENODEV;
+    }
+    dt_gpio_set(sdcard_pow_dev, SDCARD_POW, 1);
+
+    BOOT_LOG_DBG("gpio init done");
+
     int err = disk_access_init(disk_pdrv);
 
     if (err) {
