@@ -188,7 +188,7 @@ if(CONFIG_BOOT_ENCRYPT_EC256)
     )
 endif()
 
-zephyr_library_sources_ifdef(CONFIG_MCUBOOT_SD_UPDATE sd_update.c)
+zephyr_library_sources_ifdef(CONFIG_MCUBOOT_SD_UPDATE sd_update.c gpio.c)
 
 if(CONFIG_MCUBOOT_SERIAL)
   zephyr_sources(${BOOT_DIR}/zephyr/serial_adapter.c)
