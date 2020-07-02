@@ -1,0 +1,11 @@
+# SNBC ECB board configuration
+
+if BOARD_SNBC_ECB
+
+config BOARD
+	default "snbc_ecb"
+
+config BT_CTLR
+	default BT
+
+endif # BOARD_SNBC_ECB

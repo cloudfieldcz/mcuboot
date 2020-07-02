@@ -1,0 +1,116 @@
+
+/dts-v1/;
+#include <nordic/nrf52832_qfaa.dtsi>
+
+/ {
+	model = "SNBC ECB control board";
+	compatible = "snbc,ecb", "nordic,nrf52832-qfaa", "nordic,nrf52832";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led0 {
+			gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+			label = "LED_YELLOW";
+		};
+	};
+
+    switches {
+		compatible = "gpio-keys";
+		sw0: sw0 {
+			label = "SD0_DETECT";
+			gpios = <&gpio0 23 GPIO_ACTIVE_LOW>;
+		};
+		/* Note MMC_POW_ON is actually active in high even thought it is marked as MMC_POW_ONn */
+		sw1: sw1 {
+		    label = "MMC_POW_ON";
+		    gpios = <&gpio0 22 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+    aliases {
+		led-status = &led0;
+		sdcard-detect = &sw0;
+		sdcard-pow = &sw1;
+	};
+};
+
+&adc {
+	status = "okay";
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+	compatible = "nordic,nrf-uarte";
+	current-speed = <115200>;
+/* wm - sim800c */
+    tx-pin = <4>;
+    rx-pin = <5>;
+/* lb - rs485*/
+/* GPIO nastaveno programove v zetbox/prj/ecb/src/ecc_bus.c ecc_uart_lb_gpio_init() */
+/*	tx-pin = <6>;*/
+/*	rx-pin = <8>;*/
+};
+
+&spi2 {
+    compatible = "nordic,nrf-spi";
+    status = "okay";
+    cs-gpios = <&gpio0 14 GPIO_ACTIVE_LOW>;
+    sck-pin = <20>;
+    mosi-pin = <19>;
+    miso-pin = <18>;
+
+    sdhc0: sdhc@0 {
+        compatible = "zephyr,mmc-spi-slot";
+        reg = <0>;
+        status = "okay";
+        label = "SDHC0";
+        spi-max-frequency = <8000000>;
+    };
+};
+
+&flash0 {
+	/*
+	 * For more information, see:
+	 * http://docs.zephyrproject.org/latest/guides/dts/index.html#flash-partitions
+	 */
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 0xe000>;
+		};
+		slot0_partition: partition@e000 {
+			label = "image-0";
+			reg = <0x0000E000 0x6bffe>;
+		};
+		slot1_partition: partition@79ffe {
+			label = "image-1";
+			reg = <0x00079ffe 0x01>;
+		};
+		scratch_partition: partition@79fff {
+			label = "image-scratch";
+			reg = <0x00079fff 0x01>;
+		};
+		storage_partition: partition@7a000 {
+			label = "storage";
+			reg = <0x0007a000 0x00006000>;
+		};
+	};
+};

@@ -1,0 +1,6 @@
+# SNBC_ECB board configuration
+
+config BOARD_SNBC_ECB
+	bool "Locker SNBC ECB board"
+	depends on SOC_NRF52832_QFAA
+

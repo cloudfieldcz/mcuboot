@@ -24,7 +24,7 @@ rm -rf $build_dir/*
 
 #west build -b snbc_ecb -- -DBOARD_ROOT=$ZEPHYR_BASE/../zetbox/prj/ecb
 
-cmake -B $build_dir -DBOARD=snbc_ecb -DBOARD_ROOT=$ZEPHYR_BASE/../zetbox/prj/ecb -G'CodeLite - Ninja'
+cmake -B $build_dir -DBOARD=snbc_ecb -DBOARD_ROOT=$ZEPHYR_BASE/../bootloader/mcuboot/boot/zephyr -G'CodeLite - Ninja'
 # cp .clang-format $build_dir
 
 # preklad
