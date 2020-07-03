@@ -230,3 +230,5 @@ if(NOT CONFIG_BOOT_SIGNATURE_KEY_FILE STREQUAL "")
   zephyr_library_sources(${GENERATED_PUBKEY})
 endif()
 
+zephyr_linker_sources(RAM_SECTIONS sram_segger_block.ld)
+
