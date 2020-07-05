@@ -28,3 +28,4 @@ rusty-tags.*
 /scripts/*.egg
 
 build_bl_*
+.gdb_history

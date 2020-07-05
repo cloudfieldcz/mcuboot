@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <os/os_malloc.h>
+
+#include <zephyr.h>
+
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
 #include "bootutil_priv.h"
