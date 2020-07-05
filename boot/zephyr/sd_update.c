@@ -89,14 +89,14 @@ int sdu_init() {
 
     BOOT_LOG_DBG("gpio init done");
 
-    int err = disk_access_init(disk_pdrv);
+//    int err = disk_access_init(disk_pdrv);
+//
+//    if (err) {
+//        BOOT_LOG_ERR("Failed to initialize SD card (%d)", err);
+//        return err;
+//    }
 
-    if (err) {
-        BOOT_LOG_ERR("Failed to initialize SD card (%d)", err);
-        return err;
-    }
-
-    err = fs_mount(&mp);
+    int err = fs_mount(&mp);
     if (err == FR_OK) {
         BOOT_LOG_INF("SD Card mounted");
     } else {
