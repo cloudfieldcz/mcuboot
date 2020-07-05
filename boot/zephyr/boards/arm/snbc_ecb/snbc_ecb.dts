@@ -94,11 +94,11 @@
 
 		boot_partition: partition@0 {
 			label = "mcuboot";
-			reg = <0x00000000 0xe000>;
+			reg = <0x00000000 0xffff>;
 		};
-		slot0_partition: partition@e000 {
+		slot0_partition: partition@ffff {
 			label = "image-0";
-			reg = <0x0000E000 0x6bffe>;
+			reg = <0x0000ffff 0x69fff>;
 		};
 		slot1_partition: partition@79ffe {
 			label = "image-1";
