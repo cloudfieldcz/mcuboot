@@ -26,3 +26,5 @@ rusty-tags.*
 # Python egg metadata, regenerated from source files by setuptools.
 /scripts/*.egg-info
 /scripts/*.egg
+
+build_bl_*
