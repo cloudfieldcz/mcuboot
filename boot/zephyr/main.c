@@ -192,14 +192,19 @@ void main(void)
 #if (!defined(CONFIG_XTENSA) && defined(DT_FLASH_DEV_NAME))
     if (!flash_device_get_binding(DT_FLASH_DEV_NAME)) {
         BOOT_LOG_ERR("Flash device %s not found", DT_FLASH_DEV_NAME);
-        while (1)
-            ;
+        while (1) {
+            BOOT_LOG_ERR("Flash device %s not found", DT_FLASH_DEV_NAME);
+            k_sleep(100);
+        }
+        
     }
 #elif (defined(CONFIG_XTENSA) && defined(DT_JEDEC_SPI_NOR_0_LABEL))
     if (!flash_device_get_binding(DT_JEDEC_SPI_NOR_0_LABEL)) {
         BOOT_LOG_ERR("Flash device %s not found", DT_JEDEC_SPI_NOR_0_LABEL);
-        while (1)
-            ;
+        while (1) {
+            BOOT_LOG_ERR("Flash device %s not found", DT_JEDEC_SPI_NOR_0_LABEL);
+            k_sleep(100);
+        }
     }
 #endif
 
@@ -270,8 +275,11 @@ IF_ENABLED(CONFIG_MCUBOOT_SD_UPDATE, (
     ))
     if (rc != 0) {
         BOOT_LOG_ERR("Unable to find bootable image");
-        while (1)
-            ;
+        
+        while (1) {
+            BOOT_LOG_ERR("Unable to find bootable image");
+            k_sleep(100);
+        }
     }
 
     BOOT_LOG_INF("Bootloader chainload address offset: 0x%x",
@@ -281,6 +289,9 @@ IF_ENABLED(CONFIG_MCUBOOT_SD_UPDATE, (
     do_boot(&rsp);
 
     BOOT_LOG_ERR("Never should get here");
-    while (1)
-        ;
+    while (1) {
+        BOOT_LOG_ERR("Never should get here");
+        k_sleep(100);
+    }
+        
 }

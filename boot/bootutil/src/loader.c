@@ -1279,10 +1279,13 @@ boot_complete_partial_swap(struct boot_loader_state *state,
 
     if (BOOT_SWAP_TYPE(state) == BOOT_SWAP_TYPE_PANIC) {
         BOOT_LOG_ERR("panic!");
-        assert(0);
+        //assert(0);
 
         /* Loop forever... */
-        while (1) {}
+        while (1) {
+            BOOT_LOG_ERR("panic!");
+            k_sleep(100);
+        }
     }
 
     return rc;
@@ -1635,10 +1638,13 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
 
         if (BOOT_SWAP_TYPE(state) == BOOT_SWAP_TYPE_PANIC) {
             BOOT_LOG_ERR("panic!");
-            assert(0);
+            //assert(0);
 
             /* Loop forever... */
-            while (1) {}
+            while (1) {
+                BOOT_LOG_ERR("panic!");
+                k_sleep(100);
+            }
         }
     }
 
