@@ -458,7 +458,6 @@ boot_is_header_valid(const struct image_header *hdr, const struct flash_area *fa
 
     if (hdr->ih_magic != IMAGE_MAGIC) {
         BOOT_LOG_WRN("hdr->ih_magic != IMAGE_MAGIC hdr:%p",hdr);
-        __asm("bkpt 1");
         return false;
     }
 
