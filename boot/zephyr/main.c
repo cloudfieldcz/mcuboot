@@ -286,6 +286,7 @@ IF_ENABLED(CONFIG_MCUBOOT_SD_UPDATE, (
                  rsp.br_image_off);
 
     BOOT_LOG_INF("Jumping to the first image slot");
+    k_sleep(1000);
     do_boot(&rsp);
 
     BOOT_LOG_ERR("Never should get here");

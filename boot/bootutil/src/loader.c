@@ -457,17 +457,22 @@ boot_is_header_valid(const struct image_header *hdr, const struct flash_area *fa
     uint32_t size;
 
     if (hdr->ih_magic != IMAGE_MAGIC) {
+        BOOT_LOG_WRN("hdr->ih_magic != IMAGE_MAGIC hdr:%p",hdr);
+        __asm("bkpt 1");
         return false;
     }
 
     if (!boot_u32_safe_add(&size, hdr->ih_img_size, hdr->ih_hdr_size)) {
+        BOOT_LOG_WRN("boot_u32_safe_add()");
         return false;
     }
 
     if (size >= fap->fa_size) {
+        BOOT_LOG_WRN("size >= fap->fa_size");
         return false;
     }
 
+    BOOT_LOG_INF("boot_is_header_valid() OK");
     return true;
 }
 
