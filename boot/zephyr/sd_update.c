@@ -48,7 +48,7 @@ static void sdcard_detect(struct device *dev, struct gpio_callback *cb, gpio_por
 }
 
 int sdu_init() {
-    static const char *disk_pdrv = "SD";
+//    static const char *disk_pdrv = "SD";
     int ret;
 
     BOOT_LOG_DBG("setup %s", dt_gpio_label(SDCARD_DETECT));
