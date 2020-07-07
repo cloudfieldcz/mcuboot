@@ -1,8 +1,7 @@
-/* SEGGER SRAM */
-.sram_segger_block 0x20000000 (NOLOAD) :  ALIGN_WITH_INPUT
+SECTION_PROLOGUE(.sram_segger,0x20000000 (NOLOAD),)
 {
-    . = ALIGN(4);
-    __ssb_start = .;
-    *(.sram_segger)
-    __ssb_end = ALIGN(4);
-} > SRAM
+    _sram_segger_start = .;
+    KEEP(*(.sram_segger))
+    _sram_segger_end = .;
+} GROUP_LINK_IN(RAMABLE_REGION)
+_sram_segger_size = _sram_segger_end - _sram_segger_start;
