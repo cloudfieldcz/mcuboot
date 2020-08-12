@@ -6,6 +6,8 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
+message("BUILD_TYPE: ${BUILD_TYPE}")
+
 # Add a common dts overlay necessary to ensure mcuboot is linked into,
 # and fits inside, the boot partition. (If the user specified a
 # DTC_OVERLAY_FILE on the CMake command line, we need to append onto
@@ -38,6 +40,16 @@ macro(app_set_runner_args)
     board_runner_args(nrfjprog "--erase")
   endif()
 endmacro()
+
+if(BUILD_TYPE STREQUAL "DEVEL")
+    set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/devel_extra.conf)
+elseif(BUILD_TYPE STREQUAL "TEST")
+    set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/test_extra.conf)
+elseif(BUILD_TYPE STREQUAL "PROD")
+    set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/prod_extra.conf)
+else()
+    message(FATAL_ERROR "BUILD_TYPE: ${BUILD_TYPE} bad value")
+endif()
 
 # Standard Zephyr application boilerplate:
 # http://docs.zephyrproject.org/application/application.html
