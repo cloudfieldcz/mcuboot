@@ -16,7 +16,7 @@ echo "script_dir:"$script_dir
 # generovani
 cd $script_dir
 
-build_dir=build_bl_devel
+build_dir=build_bl
 echo "Vytvarim:"$build_dir
 
 mkdir -p $build_dir
