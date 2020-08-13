@@ -41,6 +41,16 @@ macro(app_set_runner_args)
   endif()
 endmacro()
 
+if(BUILD_TYPE STREQUAL "DEVEL")
+    set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/devel_extra.conf)
+elseif(BUILD_TYPE STREQUAL "TEST")
+    set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/test_extra.conf)
+elseif(BUILD_TYPE STREQUAL "PROD")
+    set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/prod_extra.conf)
+else()
+    message(FATAL_ERROR "BUILD_TYPE: ${BUILD_TYPE} bad value")
+endif()
+
 # Standard Zephyr application boilerplate:
 # http://docs.zephyrproject.org/application/application.html
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
