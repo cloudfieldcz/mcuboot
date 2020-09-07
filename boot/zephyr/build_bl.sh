@@ -69,3 +69,9 @@ cmake -B $build_dir -DBOARD=snbc_ecb -DBOARD_ROOT=$ZEPHYR_BASE/../bootloader/mcu
 # preklad
 cd $build_dir
 ninja
+
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "ninja error bl"
+    exit $retVal
+fi
