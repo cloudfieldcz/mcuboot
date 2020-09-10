@@ -165,19 +165,18 @@ int sdu_check_update(struct sd_update *update) {
     res = fs_read(&update->update_file, &update->header, sizeof(update->header));
     if (res < sizeof(&update->header)) {
         BOOT_LOG_ERR("Failed to read update header (%d)", res);
-        fs_close(&update->update_file);
         return res;
     }
 
     if (update->header.ih_magic != IMAGE_MAGIC) {
         BOOT_LOG_ERR("The update does not contain a valid image");
-        fs_close(&update->update_file);
         return res;
     }
 
     fs_seek(&update->update_file, 0, FS_SEEK_SET);
 
     return 0;
+    
 }
 
 static int get_update_hash(struct sd_update *update, uint8_t *hash_result) {
