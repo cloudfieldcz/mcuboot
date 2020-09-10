@@ -41,6 +41,7 @@ macro(app_set_runner_args)
   endif()
 endmacro()
 
+set(CONF_FILE ${CMAKE_SOURCE_DIR}/prj.conf)
 if(BUILD_TYPE STREQUAL "DEVEL")
     set(CONF_FILE ${CONF_FILE} ${CMAKE_SOURCE_DIR}/devel_extra.conf)
 elseif(BUILD_TYPE STREQUAL "TEST")
