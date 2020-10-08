@@ -88,6 +88,7 @@ int sdu_init() {
     dt_gpio_set(sdcard_pow_dev, SDCARD_POW, 1);
 
     BOOT_LOG_DBG("gpio init done");
+    k_sleep(K_MSEC(250));
 
 //    int err = disk_access_init(disk_pdrv);
 //
